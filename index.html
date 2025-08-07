@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Burn Tap Challenge</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff5f6d, #ffc371);
+    color: #fff;
+    overflow: hidden;
+  }
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #teamSelect {
+    position: absolute;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: rgba(0,0,0,0.6);
+    padding: 15px 30px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  button {
+    font-size: 16px;
+    margin: 0 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    background: #333;
+  }
+  button.selected {
+    background: #222;
+    box-shadow: 0 0 10px #fff;
+  }
+  .coin, .fire {
+    position: absolute;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .coin {
+    background: gold;
+    box-shadow: 0 0 10px #ffd700;
+  }
+  .fire {
+    background: #e03e2f;
+    box-shadow: 0 0 15px #ff3e1f;
+  }
+  #scoreboard {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  #gameOverScreen {
+    display: none;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    padding: 30px 40px;
+    border-radius: 15px;
+    text-align: center;
+    z-index: 20;
+  }
+  #gameOverScreen input {
+    padding: 10px;
+    font-size: 16px;
+    width: 80%;
+    border-radius: 8px;
+    border: none;
+    margin-top: 15px;
+  }
+  #gameOverScreen button {
+    margin-top: 20px;
+    background: #28a745;
+  }
+</style>
+</head>
+<body>
+  <div id="game">
+    <div id="teamSelect">
+      <span>Select your team: </span>
+      <button data-team="JUP">JUP</button>
+      <button data-team="HOT">HOT</button>
+      <button data-team="JOOP">JOOP</button>
+    </div>
+    <div id="scoreboard">Score: 0</div>
+
+    <div id="gameOverScreen">
+      <h2>Game Over!</h2>
+      <p>Your score: <span id="finalScore">0</span></p>
+      <input type="text" id="username" placeholder="Enter your username (pseudo)" />
+      <br />
+      <button id="submitScoreBtn">Submit Score</button>
+    </div>
+  </div>
+
+<script>
+  const game = document.getElementById('game');
+  const teamButtons = document.querySelectorAll('#teamSelect button');
+  const scoreboard = document.getElementById('scoreboard');
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const finalScoreText = document.getElementById('finalScore');
+  const usernameInput = document.getElementById('username');
+  const submitScoreBtn = document.getElementById('submitScoreBtn');
+
+  let selectedTeam = null;
+  let score = 0;
+  let gameActive = false;
+  let gameDuration = 60000; // 60 seconds
+  let spawnInterval = null;
+  let coins = [];
+  let fires = [];
+
+  teamButtons.forEach(btn => {
+    btn.onclick = () => {
+      teamButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedTeam = btn.dataset.team;
+      startGame();
+    };
+  });
+
+  function randomX() {
+    return Math.random() * (window.innerWidth - 50);
+  }
+
+  function spawnCoin() {
+    if (!gameActive) return;
+    const coin = document.createElement('div');
+    coin.className = 'coin';
+    coin.style.left = randomX() + 'px';
+    coin.style.top = '-50px';
+    game.appendChild(coin);
+    coins.push(coin);
+
+    coin.addEventListener('click', () => {
+      score++;
+      updateScore();
+      game.removeChild(coin);
+      coins = coins.filter(c => c !== coin);
+    });
+
+    fallDown(coin);
+  }
+
+  function spawnFire() {
+    if (!gameActive) return;
+    const fire = document.createElement('div');
+    fire.className = 'fire';
+    fire.style.left = randomX() + 'px';
+    fire.style.top = '-50px';
+    game.appendChild(fire);
+    fires.push(fire);
+
+    fire.addEventListener('click', () => {
+      endGame();
+    });
+
+    fallDown(fire);
+  }
+
+  function fallDown(element) {
+    let pos = -50;
+    function frame() {
+      if (!gameActive) return;
+      if (pos > window.innerHeight) {
+        if (element.className === 'coin') {
+          game.removeChild(element);
+          coins = coins.filter(c => c !== element);
+        } else {
+          game.removeChild(element);
+          fires = fires.filter(f => f !== element);
+        }
+        return;
+      }
+      pos += 4;
+      element.style.top = pos + 'px';
+      requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
+  function updateScore() {
+    scoreboard.textContent = `Score: ${score}`;
+  }
+
+  function startGame() {
+    if (!selectedTeam) return;
+    score = 0;
+    gameActive = true;
+    updateScore();
+    document.getElementById('teamSelect').style.display = 'none';
+
+    spawnInterval = setInterval(() => {
+      if (Math.random() < 0.7) spawnCoin();
+      else spawnFire();
+    }, 700);
+
+    setTimeout(() => {
+      endGame();
+    }, gameDuration);
+  }
+
+  function endGame() {
+    gameActive = false;
+    clearInterval(spawnInterval);
+
+    coins.forEach(c => game.removeChild(c));
+    fires.forEach(f => game.removeChild(f));
+    coins = [];
+    fires = [];
+
+    finalScoreText.textContent = score;
+    gameOverScreen.style.display = 'block';
+  }
+
+  submitScoreBtn.onclick = () => {
+    const username = usernameInput.value.trim();
+    if (!username) {
+      alert('Please enter your username.');
+      return;
+    }
+    alert(`Score submitted!\nTeam: ${selectedTeam}\nUsername: ${username}\nScore: ${score}`);
+    // Here you can add code to send the data to a backend or API
+    location.reload();
+  };
+</script>
+</body>
+</html>
