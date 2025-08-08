@@ -3,12 +3,74 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+  <style>
+    #connectScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #gameScreen {
+      display: none;
+    }
+  </style>
+</head>
+
+  <!-- Wallet Connection Screen -->
+  <div id="connectScreen">
+    <h2>Connect to Backpack Wallet to Start</h2>
+    <button id="connectBtn">🔗 Connect Wallet</button>
+  </div>
+
+  <!-- Your Game Container -->
+  <div id="gameScreen">
+    <!-- Your actual game canvas/HTML will be here -->
+    <div id="gameContainer"></div>
+  </div>
+
+  <script>
+  let walletAddress = null;
+
+  const connectBtn = document.getElementById('connectBtn');
+  const connectSection = document.getElementById('connectSection');
+  const gameSection = document.getElementById('gameSection');
+
+  connectBtn.onclick = async () => {
+    if (window.backpack) {
+      try {
+        const account = await window.backpack.connect();
+        walletAddress = account.publicKey.toString();
+
+        // Save to localStorage
+        localStorage.setItem("walletAddress", walletAddress);
+
+        // Hide connect section and show game
+        connectSection.style.display = "none";
+        gameSection.style.display = "block";
+
+        // Optionally load the game here if needed
+        // loadGame(); // Your game init function
+      } catch (err) {
+        alert('Wallet connection failed.');
+      }
+    } else {
+      alert('Backpack Wallet not detected.');
+    }
+  };
+</script>
+
+
+
+
 <title>Burn Tap Challenge</title>
 <style>
   body {
     margin: 0; padding: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #ff5f6d, #ffc371);
+    background: linear-gradient(135deg, black, #ffc371);
     color: #fff;
     overflow: hidden;
   }
@@ -237,5 +299,27 @@
     location.reload();
   };
 </script>
+
+<script>
+// Call this when game ends
+function submitScore(finalScore) {
+  const username = prompt("Enter your name:");
+  const wallet = localStorage.getItem("walletAddress");
+
+  fetch("submit.php", {
+    method: "POST",
+    body: new URLSearchParams({
+      wallet,
+      username,
+      score: finalScore
+    })
+  }).then(res => res.text())
+    .then(console.log)
+    .catch(console.error);
+}
+</script>
+
+
 </body>
 </html>
+
