@@ -32,32 +32,33 @@
   </div>
 
   
-<script>
-let walletAddress = null;
+ <script>
+      let walletAddress = null;
 
-const connectBtn = document.getElementById('connectBtn');
+      const connectBtn = document.getElementById('connectBtn');
+      const connectSection = document.getElementById('connectSection');
+      const gameSection = document.getElementById('gameSection');
 
-connectBtn.onclick = async () => {
-    if (window.solana && window.solana.isBackpack) {
-        try {
-            const resp = await window.solana.connect();
-            walletAddress = resp.publicKey.toString();
 
+      connectBtn.onclick = async () => {
+        if (window.backpack) {
+          try {
+            const account = await window.backpack.connect();
+            walletAddress = account.publicKey.toString();
+
+            // Save to localStorage
             localStorage.setItem("walletAddress", walletAddress);
-            alert("Wallet connected: " + walletAddress);
 
-            // Show the game section
-            document.getElementById('connectSection').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-
-        } catch (err) {
-            alert('Wallet connection failed: ' + err.message);
+            // Redirect after successful connection
+            window.location.href = "https://taiwokassim.github.io/burn_game";
+          } catch (err) {
+            alert('Wallet connection failed.');
+          }
+        } else {
+          alert('Backpack Wallet not detected.');
         }
-    } else {
-        alert('Backpack Wallet not detected. Please open this in the Backpack browser.');
-    }
-};
-</script>
+      };
+    </script>
 
 
 
@@ -316,5 +317,6 @@ function submitScore(finalScore) {
 
 </body>
 </html>
+
 
 
