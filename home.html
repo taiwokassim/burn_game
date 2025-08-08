@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Burn Tap Challenge</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+    #connectBtn {
+      background-color: #f7931a;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔥 Burn Tap Challenge 🔥</h1>
+  <p>Please connect your Backpack Wallet to continue</p>
+  <button id="connectBtn">Connect to Backpack Wallet</button>
+
+  <script>
+      let walletAddress = null;
+
+      const connectBtn = document.getElementById('connectBtn');
+      const connectSection = document.getElementById('connectSection');
+      const gameSection = document.getElementById('gameSection');
+
+
+      connectBtn.onclick = async () => {
+        if (window.backpack) {
+          try {
+            const account = await window.backpack.connect();
+            walletAddress = account.publicKey.toString();
+
+            // Save to localStorage
+            localStorage.setItem("walletAddress", walletAddress);
+
+            // Redirect after successful connection
+            window.location.href = "https://taiwokassim.github.io/burn_game";
+          } catch (err) {
+            alert('Wallet connection failed.');
+          }
+        } else {
+          alert('Backpack Wallet not detected.');
+        }
+      };
+    </script>
+
+</body>
+</html>
