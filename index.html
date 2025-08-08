@@ -19,51 +19,9 @@
   </style>
 </head>
 
-  <!-- Wallet Connection Screen -->
-  <div id="connectScreen">
-    <h2>Connect to Backpack Wallet to Start</h2>
-    <button id="connectBtn">🔗 Connect Wallet</button>
-  </div>
-
-  <!-- Your Game Container -->
-  <div id="gameScreen">
-    <!-- Your actual game canvas/HTML will be here -->
-    <div id="gameContainer"></div>
-  </div>
+ 
 
   
- <script>
-      let walletAddress = null;
-
-      const connectBtn = document.getElementById('connectBtn');
-      const connectSection = document.getElementById('connectSection');
-      const gameSection = document.getElementById('gameSection');
-
-
-      connectBtn.onclick = async () => {
-        if (window.backpack) {
-          try {
-            const account = await window.backpack.connect();
-            walletAddress = account.publicKey.toString();
-
-            // Save to localStorage
-            localStorage.setItem("walletAddress", walletAddress);
-
-             // Redirect after successful connection
-            window.location.href = "https://taiwokassim.github.io/burn_game";
-
-            
-          } catch (err) {
-            alert('Wallet connection failed.');
-          }
-        } else {
-          alert('Backpack Wallet not detected.');
-        }
-      };
-    </script>
-
-
-
 
 <title>Burn Tap Challenge</title>
 <style>
@@ -319,6 +277,7 @@ function submitScore(finalScore) {
 
 </body>
 </html>
+
 
 
 
